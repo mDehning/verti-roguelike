@@ -1,21 +1,25 @@
 package verti.roguelike;
 
+import java.awt.Dimension;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.JDialog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import asciiPanel.AsciiFont;
 import asciiPanel.AsciiPanel;
 
-public class RoguelikeEngine extends KeyAdapter{
+public class RoguelikeEngine extends KeyAdapter implements WindowListener{
 
 	private static final Logger LOG = LoggerFactory.getLogger(RoguelikeEngine.class);
 	
-	private static Integer pressedKey = null;
+	private static KeyEvent pressedKey = null;
+	private static Boolean consoleClosed = false;
 	
 	public static void main(String[] args){
 		new RoguelikeEngine().run(args);
@@ -26,19 +30,34 @@ public class RoguelikeEngine extends KeyAdapter{
 		console.setTitle("Vertis Roguelike");
 		console.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-		AsciiPanel panel = new AsciiPanel(80, 30);
+		Integer screen_width 	= 80;
+		Integer screen_height 	= 50;
+		
+		Integer player_x = screen_width / 2;
+		
+		Integer player_y = screen_height / 2;
+		LOG.debug(String.format("Value X %s, Value Y %s", player_x, player_y));
+		AsciiFont font = AsciiFont.DRAKE_10x10;
+		AsciiPanel panel = new AsciiPanel(screen_width, screen_height, font);
 		panel.setFocusable(true);
 		panel.addKeyListener(this);
 		
-		console.setSize(panel.getPreferredSize());
+		
 		console.add(panel);
+		console.pack();	// Adjusts the size of the window to the size of the Panel
+
 		console.setVisible(true);
+		console.addWindowListener(this);
 		
-		
-		while(true) {
-			Integer key = waitForInput();
+		while(!Boolean.TRUE.equals(consoleClosed)) {
+			panel.setForeground(AsciiPanel.white);
+			panel.setDefaultBackgroundColor(AsciiPanel.black);
+			panel.write('@', player_x, player_y, panel.getDefaultForegroundColor());
+			panel.repaint();
+			
+			KeyEvent key = waitForInput();
 			LOG.info("Key Pressed: " + key);
-			if(key == KeyEvent.VK_ESCAPE)
+			if(key != null && key.getKeyCode() == KeyEvent.VK_ESCAPE)
 				break;
 		}
 		// Tear Down
@@ -48,7 +67,15 @@ public class RoguelikeEngine extends KeyAdapter{
 		System.exit(0);
 	}
 	
-	protected synchronized Integer waitForInput() {
+	/**
+	 * This method will wait till the "pressedKey" Buffer is filled with anything - and then
+	 * passes this up to the caller method. 
+	 * Note: Synchronized is needed to be able to call the wait() method.
+	 * In future iterations maybe more then the keyCode will be passed up - a simplified keyEvent 
+	 * (or the event itself under certain conditions) could be possible. Maybe even required for complex 
+	 * Key combinations like shift + ctrl + X
+	 */
+	protected synchronized KeyEvent waitForInput() {
 		
 		// Wait till you get a key press
 		if(pressedKey == null) {
@@ -57,7 +84,7 @@ public class RoguelikeEngine extends KeyAdapter{
 			} catch (InterruptedException e) {}
 		}
 		// Process that key
-		Integer myKey = pressedKey;
+		KeyEvent myKey = pressedKey;
 		
 		// Clear Buffer
 		pressedKey = null;
@@ -74,14 +101,24 @@ public class RoguelikeEngine extends KeyAdapter{
 		 */
 		synchronized(this) {
 			if(pressedKey == null) {
-				if(!event.isActionKey()) {
-					pressedKey = event.getKeyCode();
-					this.notifyAll();
-				}
+				pressedKey = event;
+				this.notifyAll();
 			}
 		}
 		
 	}
+	public void windowActivated(WindowEvent e) {	}
+	public void windowClosed(WindowEvent e) {
+		synchronized(this) {
+			consoleClosed = true;
+			notifyAll();
+		}
+	}
+	public void windowClosing(WindowEvent e) {	}
+	public void windowDeactivated(WindowEvent e) {	}
+	public void windowDeiconified(WindowEvent e) {	}
+	public void windowIconified(WindowEvent e) {	}
+	public void windowOpened(WindowEvent e) {	}
 
 	
 }
