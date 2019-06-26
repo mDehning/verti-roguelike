@@ -1,10 +1,8 @@
 package verti.roguelike;
 
-import java.awt.Point;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JDialog;
 
@@ -13,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import asciiPanel.AsciiFont;
 import asciiPanel.AsciiPanel;
+import verti.roguelike.entities.Entity;
+import verti.roguelike.modules.RenderModule;
 import verti.roguelike.util.RLAction;
 
 public class RoguelikeEngine{
@@ -33,15 +33,22 @@ public class RoguelikeEngine{
 		console.setTitle("Vertis Roguelike");
 		console.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-		Integer screen_width 	= 80;
-		Integer screen_height 	= 50;
+		Integer screenWidth 	= 80;
+		Integer screenHeight 	= 50;
 		
-		Integer player_x = screen_width / 2;
+		Integer player_x = screenWidth / 2;
+		Integer player_y = screenHeight / 2;
 		
-		Integer player_y = screen_height / 2;
+		// Creating the Entities of the project
+		List<Entity> entities = new ArrayList<>(); 
+		Entity player = new Entity(screenWidth / 2, screenHeight/ 2, '@', AsciiPanel.white);
+		entities.add(player);
+		Entity npc = new Entity(screenWidth / 2 - 1, screenHeight/ 2 + 1, '@', AsciiPanel.red);
+		entities.add(npc);
+		
 		LOG.debug(String.format("Value X %s, Value Y %s", player_x, player_y));
 		AsciiFont font = AsciiFont.DRAKE_10x10;
-		AsciiPanel panel = new AsciiPanel(screen_width, screen_height, font);
+		AsciiPanel panel = new AsciiPanel(screenWidth, screenHeight, font);
 		panel.setFocusable(true);
 		panel.addKeyListener(inputHandler);
 		
@@ -55,22 +62,26 @@ public class RoguelikeEngine{
 		while(!Boolean.TRUE.equals(consoleClosed)) {
 			panel.setForeground(AsciiPanel.white);
 			panel.setDefaultBackgroundColor(AsciiPanel.black);
-			panel.write('@', player_x, player_y, panel.getDefaultForegroundColor());
+			RenderModule.renderAll(panel, entities);
+			
 			panel.repaint();
 			
-			RLAction key = inputHandler.waitForInput();
-			LOG.info("Key Pressed: " + key);
+			RLAction action = inputHandler.waitForInput();
+			LOG.info("Action triggered: " + action);
 			
-			if(Boolean.TRUE.equals(key.getExit()))
+			// TODO: This is currently highly inefficient, as EVERY entity is getting erased and redrawn regardles if they move at all.
+			RenderModule.clearAll(panel, entities);
+			
+			if(Boolean.TRUE.equals(action.getExit()))
 				break;
 			
-			if(key.getMove() != null) {
-				panel.write(' ', player_x, player_y, panel.getDefaultForegroundColor());
-				player_x += (int) key.getMove().getX();
-				player_y += (int) key.getMove().getY();
+			if(action.getMove() != null) {
+				panel.write(' ', player.getX(), player.getY());
+				player.move(action.dx(), action.dy());
+				
 			}
 			
-			if(key.getFullscreen() != null) {
+			if(action.getFullscreen() != null) {
 				// TODO: implement some kind of Fullscreen !?
 			}
 		}
