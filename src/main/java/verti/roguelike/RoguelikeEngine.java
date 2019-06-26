@@ -1,8 +1,11 @@
 package verti.roguelike;
 
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JDialog;
 
@@ -12,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import asciiPanel.AsciiFont;
 import asciiPanel.AsciiPanel;
 import verti.roguelike.domain.Entity;
+import verti.roguelike.domain.GameMap;
 import verti.roguelike.modules.RenderModule;
 import verti.roguelike.util.RLAction;
 
@@ -36,8 +40,15 @@ public class RoguelikeEngine{
 		Integer screenWidth 	= 80;
 		Integer screenHeight 	= 50;
 		
-		Integer player_x = screenWidth / 2;
-		Integer player_y = screenHeight / 2;
+		Integer mapWidth = 80;
+		Integer mapHeight = 45;
+		
+		GameMap gameMap = new GameMap(mapWidth, mapHeight);
+		
+		// Color Dictionary
+		Map<String, Color> colors = new HashMap<>();
+		colors.put("darkWall", new Color(0,0,100));
+		colors.put("darkGround", new Color(50, 50, 100));
 		
 		// Creating the Entities of the project
 		List<Entity> entities = new ArrayList<>(); 
@@ -46,12 +57,11 @@ public class RoguelikeEngine{
 		Entity npc = new Entity(screenWidth / 2 - 1, screenHeight/ 2 + 1, '@', AsciiPanel.red);
 		entities.add(npc);
 		
-		LOG.debug(String.format("Value X %s, Value Y %s", player_x, player_y));
+		LOG.debug(String.format("Value X %s, Value Y %s", player.getX(), player.getY()));
 		AsciiFont font = AsciiFont.DRAKE_10x10;
 		AsciiPanel panel = new AsciiPanel(screenWidth, screenHeight, font);
 		panel.setFocusable(true);
 		panel.addKeyListener(inputHandler);
-		
 		
 		console.add(panel);
 		console.pack();	// Adjusts the size of the window to the size of the Panel
@@ -62,7 +72,7 @@ public class RoguelikeEngine{
 		while(!Boolean.TRUE.equals(consoleClosed)) {
 			panel.setForeground(AsciiPanel.white);
 			panel.setDefaultBackgroundColor(AsciiPanel.black);
-			RenderModule.renderAll(panel, entities);
+			RenderModule.renderAll(panel, entities, gameMap, colors);
 			
 			panel.repaint();
 			
@@ -76,8 +86,9 @@ public class RoguelikeEngine{
 				break;
 			
 			if(action.getMove() != null) {
-				panel.write(' ', player.getX(), player.getY());
-				player.move(action.dx(), action.dy());
+				if(!gameMap.isBlocked(player.getX() + action.dx(), player.getY() + action.dy())) {
+					player.move(action.dx(), action.dy());
+				}
 				
 			}
 			
