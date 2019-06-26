@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import asciiPanel.AsciiFont;
 import asciiPanel.AsciiPanel;
-import verti.roguelike.entities.Entity;
+import verti.roguelike.domain.Entity;
 import verti.roguelike.modules.RenderModule;
 import verti.roguelike.util.RLAction;
 

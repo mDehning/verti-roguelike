@@ -1,4 +1,4 @@
-package verti.roguelike.entities;
+package verti.roguelike.domain;
 
 import java.awt.Color;
 

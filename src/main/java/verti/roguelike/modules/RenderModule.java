@@ -3,7 +3,7 @@ package verti.roguelike.modules;
 import java.util.List;
 
 import asciiPanel.AsciiPanel;
-import verti.roguelike.entities.Entity;
+import verti.roguelike.domain.Entity;
 
 /**
  * Module Class to manage functions to draw and clear elements on the screen
