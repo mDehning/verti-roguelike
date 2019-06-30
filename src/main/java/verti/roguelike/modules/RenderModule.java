@@ -7,6 +7,7 @@ import java.util.Map;
 import asciiPanel.AsciiPanel;
 import verti.roguelike.domain.Entity;
 import verti.roguelike.domain.GameMap;
+import verti.roguelike.util.RLColor;
 
 /**
  * Module Class to manage functions to draw and clear elements on the screen
@@ -15,16 +16,16 @@ import verti.roguelike.domain.GameMap;
  */
 public class RenderModule {
 
-	public static void renderAll(AsciiPanel panel, List<Entity> entities, GameMap map, Map<String, Color> colors) {
+	public static void renderAll(AsciiPanel panel, List<Entity> entities, GameMap map) {
 		
 		// Drawing all Tiles in the game map
 		for(int y = 0; y < map.getHeight(); y++) {
 			for(int x = 0; x < map.getWidth(); x++) {
 				Boolean isWall = Boolean.TRUE.equals(map.getTiles()[x][y].getOpaque());
 				if(isWall) {
-					panel.write(' ', x, y, AsciiPanel.white, colors.get("darkWall"));
+					panel.write(' ', x, y, AsciiPanel.white, RLColor.WALL_DARK);
 				} else {
-					panel.write(' ', x, y, AsciiPanel.white, colors.get("darkGround"));
+					panel.write(' ', x, y, AsciiPanel.white, RLColor.FLOOR_DARK);
 				}
 			}
 		}

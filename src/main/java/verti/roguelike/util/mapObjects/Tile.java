@@ -1,4 +1,4 @@
-package verti.roguelike.domain;
+package verti.roguelike.util.mapObjects;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

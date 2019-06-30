@@ -43,21 +43,6 @@ public class RoguelikeEngine{
 		Integer mapWidth = 80;
 		Integer mapHeight = 45;
 		
-		GameMap gameMap = new GameMap(mapWidth, mapHeight);
-		
-		// Color Dictionary
-		Map<String, Color> colors = new HashMap<>();
-		colors.put("darkWall", new Color(0,0,100));
-		colors.put("darkGround", new Color(50, 50, 100));
-		
-		// Creating the Entities of the project
-		List<Entity> entities = new ArrayList<>(); 
-		Entity player = new Entity(screenWidth / 2, screenHeight/ 2, '@', AsciiPanel.white);
-		entities.add(player);
-		Entity npc = new Entity(screenWidth / 2 - 1, screenHeight/ 2 + 1, '@', AsciiPanel.red);
-		entities.add(npc);
-		
-		LOG.debug(String.format("Value X %s, Value Y %s", player.getX(), player.getY()));
 		AsciiFont font = AsciiFont.DRAKE_10x10;
 		AsciiPanel panel = new AsciiPanel(screenWidth, screenHeight, font);
 		panel.setFocusable(true);
@@ -65,14 +50,29 @@ public class RoguelikeEngine{
 		
 		console.add(panel);
 		console.pack();	// Adjusts the size of the window to the size of the Panel
-
+		
 		console.setVisible(true);
 		console.addWindowListener(inputHandler);
+		
+//		GameMap gameMap = new GameMap(mapWidth, mapHeight);
+		GameMap gameMap = new MapGenerator().panel(panel).build();
+		
+		
+		
+		// Creating the Entities of the project
+		List<Entity> entities = new ArrayList<>(); 
+		Entity player = new Entity((int) gameMap.getSpawn().getX(), (int) gameMap.getSpawn().getY(), '@', AsciiPanel.white);
+		entities.add(player);
+		Entity npc = new Entity((int) gameMap.getSpawn().getX() - 1, (int) gameMap.getSpawn().getY() + 4, '@', AsciiPanel.red);
+		entities.add(npc);
+		
+		
+		LOG.debug(String.format("Value X %s, Value Y %s", player.getX(), player.getY()));
 		
 		while(!Boolean.TRUE.equals(consoleClosed)) {
 			panel.setForeground(AsciiPanel.white);
 			panel.setDefaultBackgroundColor(AsciiPanel.black);
-			RenderModule.renderAll(panel, entities, gameMap, colors);
+			RenderModule.renderAll(panel, entities, gameMap);
 			
 			panel.repaint();
 			
